@@ -1,10 +1,7 @@
 import React from "react";
 import FullCalendar from "@fullcalendar/react"; // must go before plugins
 import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-
-const MySwal = withReactContent(Swal);
+import PopUp from "./PopUp";
 
 function renderEventContent(eventInfo) {
   return (
@@ -15,32 +12,42 @@ function renderEventContent(eventInfo) {
   );
 }
 
-export default class DemoApp extends React.Component {
+export default class Cal extends React.Component {
+  state = {
+    openPopUp: false,
+    popUpData: {}
+  };
+
+  togglePop = () => {
+    // console.log("clicked", this.state.openPopUp)
+    this.setState({
+      openPopUp: !this.state.openPopUp,
+    });
+  };
+
+  openPopUp = (info) => {
+    this.setState({
+      openPopUp: true,
+      popUpData: info.event
+    })
+    // console.log("pop-up-data =>", this.state.popUpData)
+  }
+
   render() {
     return (
-      <FullCalendar
-        plugins={[dayGridPlugin]}
-        eventContent={renderEventContent}
-        initialView="dayGridMonth"
-        events={[
-          { title: "event 1", date: "2022-02-01" },
-          { title: "event 2", date: "2022-02-05" },
-        ]}
-        eventClick={(ev) => {
-          // console.log("clicked", ev.event.title);
-          MySwal.fire({
-            title: <p>Event Data</p>,
-            footer: "Copyright 2018",
-            didOpen: () => {
-              // `MySwal` is a subclass of `Swal`
-              //   with all the same instance & static methods
-              MySwal.clickConfirm();
-            },
-          }).then(() => {
-            return MySwal.fire(<p>{ev.event.title}</p>);
-          });
-        }}
-      />
+      <>
+        <FullCalendar
+          plugins={[dayGridPlugin]}
+          eventContent={renderEventContent}
+          initialView="dayGridMonth"
+          events={[
+            { title: "event 1", date: "2022-02-01" },
+            { title: "event 2", date: "2022-02-05" },
+          ]}
+          eventClick={this.openPopUp}
+        />
+        {this.state.openPopUp ? <PopUp toggle={this.togglePop} data={this.state.popUpData}/> : null}
+      </>
     );
   }
 }
